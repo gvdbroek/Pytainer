@@ -1,0 +1,13 @@
+web:
+  in:
+    - biep
+  out:
+    - boep
+api:
+  name_of_endpoint:
+    - get:
+      whatever: asdasd
+    - post:
+      whatever : asdads
+    
+    
