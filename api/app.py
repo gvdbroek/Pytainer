@@ -1,5 +1,8 @@
+from io import BytesIO
 import dotenv
+
 import uuid
+from uuid import UUID
 from flask import Flask
 import docker
 import pytainer
@@ -27,19 +30,8 @@ def status():
 
 @app.route("/containers", methods=["POST"])
 def new_container():
-    import shutil
-    import os
-
-    app_dir = os.environ["APP_DIR"]
-
-    if not os.path.exists(app_dir):
-        os.mkdir(app_dir)
-
-    new_id = str(uuid.uuid4())
-    container_path = os.path.join(app_dir, new_id)
-    os.mkdir(container_path)
-
-    return new_id
+    c_id = pytainer.create_bucker()
+    return {"created": c_id}
 
 
 @app.route("/containers/<container_id>", methods=["PUT"])
@@ -47,19 +39,17 @@ def upload_script(container_id):
     import os
     import shutil
 
-    # ensure folder is empty
-    container_dir = os.path.join(os.environ["APP_DIR"], container_id)
-    try:
-        shutil.rmtree(container_dir)
-    except Exception as e:
-        return str(e)
-    os.mkdir(container_dir)
+    container_id = str("0147f5965a")
 
-    # copy template into container_dir
+    # todo: get file from request
+    # Note: the zip is constructed by the frontend in a predefined format
 
-    # copy recieved files into template
-    #
-    # Create image from template
+    # unzip file into bucket
+    zip_file_path = "./assets/sample_script/sample.zip"
+    with open(zip_file_path, mode="rb") as zip_file:
+        zip_content = zip_file.read()
+
+    pytainer.create_image(container_id, BytesIO(zip_content))
 
     return "Ok"
 

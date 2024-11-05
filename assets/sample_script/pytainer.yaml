@@ -1,0 +1,9 @@
+web:
+  in:
+    - file:
+      id: in
+      name: input_example.txt
+  out:
+    - file:
+      id: out
+      name: output_example.txt
