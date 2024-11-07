@@ -74,9 +74,11 @@ def create_image(bucket_id: str, zip_content: BytesIO):
     logger.info("Copying Template")
     shutil.copytree(TEMPLATE_DIR, container_path, dirs_exist_ok=True)
 
+    # debug: create zip image from template
+
     logger.info("Unzipping User code")
     with zipfile.ZipFile(zip_content) as zp:
-        zp.extractall(container_path)
+        zp.extractall(container_path + "/app")
 
     logger.info("Building Image from %s" % container_path)
     name = _get_image_name(bucket_id)

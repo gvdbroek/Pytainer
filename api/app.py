@@ -44,8 +44,11 @@ def upload_script(container_id):
     # todo: get file from request
     # Note: the zip is constructed by the frontend in a predefined format
 
+    import utils
+
+    zip_file_path = "../assets/generated.zip"
+    utils.zip_directory("../assets/sample_script/", zip_file_path)
     # unzip file into bucket
-    zip_file_path = "./assets/sample_script/sample.zip"
     with open(zip_file_path, mode="rb") as zip_file:
         zip_content = zip_file.read()
 
