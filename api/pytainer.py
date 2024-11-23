@@ -19,10 +19,13 @@ dotenv.load_dotenv()
 
 logger.info("Loading Module Pytainer")
 CONTAINER_DIR = os.environ.get("CONTAINER_DIR", "")
-TEMPLATE_DIR = os.environ.get("TEMPLATE_DIR", "./templates/container")
+TEMPLATE_DIR = os.environ.get("IMAGE_TEMPLATE", "")
 CLIENT = None
-logger.info("Container Directory: %s" % CONTAINER_DIR)
 
+assert CONTAINER_DIR, "Expected CONTAINER_DIR env variable"
+assert TEMPLATE_DIR, "Expected IMAGE_TEMPLATE env variable"
+
+logger.info("Container Directory: %s" % CONTAINER_DIR)
 if not CONTAINER_DIR:
     raise EnvironmentError("Missing environment Variable %s" % CONTAINER_DIR)
 
@@ -64,7 +67,7 @@ def create_bucker() -> str:
     return new_id
 
 
-def create_image(bucket_id: str, zip_content: BytesIO):
+def create_image(bucket_id: str, zip_content: BytesIO) -> str:
     logger.info("Creating image: %s" % bucket_id)
     client = _get_client()
     container_path = _get_container_path(bucket_id)
@@ -84,14 +87,15 @@ def create_image(bucket_id: str, zip_content: BytesIO):
     name = _get_image_name(bucket_id)
     client.images.build(path=container_path, tag=name)
     logger.info("Image created")
+    return name
 
 
-def create_container(id):
-    logger.info("Creating new container %s" % id)
-
-
-def run_container(id):
-    logger.info("Running container %s" % id)
+def run_container(image_id):
+    assert image_id
+    client = _get_client()
+    image_name = _get_image_name(image_id)
+    logger.info("Starting Container for image: %s" % image_id)
+    client.containers.run(image_name, detach=True)
 
 
 def delete_container(id):

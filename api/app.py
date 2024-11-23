@@ -1,9 +1,8 @@
 from io import BytesIO
+from logging import Logger
 import dotenv
 
-import uuid
-from uuid import UUID
-from flask import Flask
+from flask import Flask, render_template, request
 import docker
 import pytainer
 
@@ -18,14 +17,13 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "Home"
+    return render_template("dev.html")
 
 
 @app.route("/status")
 def status():
-    docker_status = "Ok!" if client != None else "Not Running"
+    docker_status = "Ok!" if client is not None else "Not Running"
     return {"docker": docker_status}
-    return client
 
 
 @app.route("/containers", methods=["POST"])
@@ -36,9 +34,6 @@ def new_container():
 
 @app.route("/containers/<container_id>", methods=["PUT"])
 def upload_script(container_id):
-    import os
-    import shutil
-
     container_id = str("0147f5965a")
 
     # todo: get file from request
@@ -48,13 +43,26 @@ def upload_script(container_id):
 
     zip_file_path = "../assets/generated.zip"
     utils.zip_directory("../assets/sample_script/", zip_file_path)
+
     # unzip file into bucket
     with open(zip_file_path, mode="rb") as zip_file:
         zip_content = zip_file.read()
 
-    pytainer.create_image(container_id, BytesIO(zip_content))
+    image_name = pytainer.create_image(container_id, BytesIO(zip_content))
+    pytainer.run_container(image_name)
 
     return "Ok"
+
+
+@app.route("/commands/run", methods=["POST"])
+def start_container():
+    # accepts image_name filter
+    image_id = request.args.get("image_id")
+    if not image_id:
+        return "Image not found"
+    print("Starting container: %s" % image_id)
+    pytainer.run_container(image_id)
+    return "Starting container: %s" % image_id
 
 
 @app.route("/web/<container_id>", methods=["GET"])
